@@ -2286,11 +2286,26 @@ void BeginNodeEditor()
         GImNodes->OriginalImgCtx = ImGui::GetCurrentContext();
 
         // Copy config settings in IO from main context, avoiding input fields
-        memcpy(
-            (void*)&editor.NodeEditorImgCtx->IO,
-            (void*)&GImNodes->OriginalImgCtx->IO,
-            offsetof(ImGuiIO, SetPlatformImeDataFn) +
-                sizeof(GImNodes->OriginalImgCtx->IO.SetPlatformImeDataFn));
+        ImGuiIO& destIO = editor.NodeEditorImgCtx->IO;
+        const ImGuiIO& srcIO = GImNodes->OriginalImgCtx->IO;
+
+        // 1. Copy Critical Timing & Config (Crucial for clicks working!)
+        destIO.DeltaTime = srcIO.DeltaTime; 
+        destIO.ConfigFlags = srcIO.ConfigFlags;
+        destIO.BackendFlags = srcIO.BackendFlags;
+
+        // 2. Copy Style/Behavior Settings
+        destIO.MouseDoubleClickTime = srcIO.MouseDoubleClickTime;
+        destIO.MouseDragThreshold = srcIO.MouseDragThreshold;
+        destIO.KeyRepeatDelay = srcIO.KeyRepeatDelay;
+        destIO.KeyRepeatRate = srcIO.KeyRepeatRate;
+        destIO.IniSavingRate = srcIO.IniSavingRate;
+        
+        // 3. Copy Rendering Settings
+        destIO.Fonts = srcIO.Fonts;
+        destIO.FontGlobalScale = srcIO.FontGlobalScale;
+        destIO.DisplayFramebufferScale = srcIO.DisplayFramebufferScale;
+        destIO.MouseDrawCursor = srcIO.MouseDrawCursor;
 
         editor.NodeEditorImgCtx->IO.BackendPlatformUserData = nullptr;
         editor.NodeEditorImgCtx->IO.BackendRendererUserData = nullptr;
